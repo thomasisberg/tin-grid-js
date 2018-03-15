@@ -5069,8 +5069,8 @@ timers-ext@^0.1.2:
     next-tick "1"
 
 tin-grid@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/tin-grid/-/tin-grid-0.1.0.tgz#69ba1bc94391ee54caa69d66aee2f22b947ad089"
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/tin-grid/-/tin-grid-0.1.1.tgz#bd3863b9f181311378f9f41f41007b53a460a8ff"
 
 to-absolute-glob@^2.0.0:
   version "2.0.2"
