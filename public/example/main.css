@@ -51,6 +51,12 @@ table {
 body {
   font-family: sans-serif; }
 
+h1 {
+  font-size: 2em;
+  text-align: center;
+  margin: 40px;
+  font-weight: 700; }
+
 #TinGrid {
   max-width: 1200px;
   margin-left: auto;

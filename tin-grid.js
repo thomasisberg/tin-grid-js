@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.0
+ * TinGrid v0.1.1
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -151,7 +151,6 @@
                     item = items[i];
 
                     var itemIsWide = hasClass(item, "wide");
-
                     item.style.width = (w_col_perc*(itemIsWide?2:1)) + "%";
                     
                     /**
@@ -192,7 +191,7 @@
                             var jItemIsWide = hasClass(jItem, "wide");
 
                             if(!jItemIsWide) {
-
+                                jItem.style.width = (w_col_perc*(jItemIsWide?2:1)) + "%";
                                 var jItemHeight = getItemHeight(jItem, jItemIsWide, w_col);
 
                                 if(jItemHeight < gapAbs * 1.5) {

@@ -69,11 +69,11 @@
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tin_grid__ = __webpack_require__(1);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__tin_grid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__tin_grid__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tin_grid__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_tin_grid___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_tin_grid__);
 
 
-__WEBPACK_IMPORTED_MODULE_0__tin_grid___default()(document.getElementById('TinGrid'), {
+__WEBPACK_IMPORTED_MODULE_0_tin_grid___default()(document.getElementById('TinGrid'), {
     itemHeightType: "ratio",
     itemHeight: 1,
     wideItemHeight: 1,

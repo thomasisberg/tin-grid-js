@@ -1,4 +1,4 @@
-import TinGrid from './tin-grid';
+import TinGrid from 'tin-grid';
 
 TinGrid(document.getElementById('TinGrid'), {
     itemHeightType: "ratio",
