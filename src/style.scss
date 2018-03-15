@@ -1,0 +1,68 @@
+// Easing.
+$easeout: cubic-bezier(0,.8,.21,1);
+$easeinout: cubic-bezier(.48,.01,.21,1);
+$easein: cubic-bezier(0.895, 0.010, 0.965, 0.390);
+$easeinfast: cubic-bezier(0.400, 0.010, 0.605, 0.360);
+
+html, body, div, img, ul, li {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+img {
+    width: 100%;
+    height: auto;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.wrapper {
+    flex: 0 1 600px;
+}
+.slider-wrapper {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+.tin-slide-prev, .tin-slide-next {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background-color: black;
+}
+.tin-slide-next {
+    left: inherit;
+    right: 10px;
+}
+.tin-slide-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.tin-slide-dots li {
+    box-sizing: border-box;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    background-color: black;
+    border: 2px solid black;
+    margin-right: 5px;
+    &.on {
+        background-color: white;
+    }
+}
+.sub-slider {
+    padding: 50px;
+}
+.sub-slider .tin-slide-next-prev {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+}

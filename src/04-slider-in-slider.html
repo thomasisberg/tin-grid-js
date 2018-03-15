@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Slider in slider / TinSlide</title>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+        <style>
+            .slider {
+                transition: height 500ms cubic-bezier(.48,.01,.21,1);
+            }
+            .slider .slider-wrapper {
+                margin: 10%;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrapper">
+            <div class="slider-wrapper">
+                <div class="slider">
+                    <div><div class="tin-slide-img" data-src="img-1.jpg"></div></div>
+                    <div><div class="tin-slide-img" data-src="img-2.jpg"></div></div>
+                    <div><div class="tin-slide-img" data-src="img-3.jpg"></div></div>
+                    <div>
+                        <div class="slider-wrapper">
+                            <div class="slider">
+                                <div><div class="tin-slide-img" data-src="img-1.jpg"></div></div>
+                                <div><div class="tin-slide-img" data-src="img-2.jpg"></div></div>
+                                <div><div class="tin-slide-img" data-src="img-3.jpg"></div></div>
+                                <div>
+                                    <div class="slider-wrapper">
+                                        <div class="slider">
+                                            <div><div class="tin-slide-img" data-src="img-1.jpg"></div></div>
+                                            <div><div class="tin-slide-img" data-src="img-2.jpg"></div></div>
+                                            <div><div class="tin-slide-img" data-src="img-3.jpg"></div></div>
+                                            <div>
+                                                <div class="slider-wrapper">
+                                                    <div class="slider">
+                                                        <div><div class="tin-slide-img" data-src="img-1.jpg"></div></div>
+                                                        <div><div class="tin-slide-img" data-src="img-2.jpg"></div></div>
+                                                        <div><div class="tin-slide-img" data-src="img-3.jpg"></div></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="tin-slide.js"></script>
+        <script>
+            var slides = document.getElementsByClassName('slider');
+
+            for(var ii=0; ii<slides.length; ii++) {
+                TinSlide(slides[ii], {
+                    loop: false,
+                    useUpdateContainerHeight: true,
+                    verticallyCenter: true,
+                    generate: {
+                        nav: {
+                            on: false
+                        }
+                    }
+                });
+            }
+        </script>
+    </body>
+</html>
