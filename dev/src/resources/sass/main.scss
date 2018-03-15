@@ -31,12 +31,14 @@ ul {
 li {
     display: flex;
     flex-direction: column;
+    padding: 5px;
     
     &:after {
+        position: relative;
         display: block;
         content: "";
         background-color: red;
-        margin: 5px;
         flex-grow: 1;
+        padding-top: 100%;
     }
 }

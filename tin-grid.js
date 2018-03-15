@@ -9,6 +9,9 @@
 	(global.TinGrid = factory());
 }(this, (function () {
 
+    /*----------------------------------------------------
+    | Helpers.
+    |---------------------------------------------------*/
     function isEmpty(value) {
         return value === undefined || value === null || value === '';
     }
@@ -25,9 +28,16 @@
         return element.className.split(" ").indexOf(className) >= 0;
     }
 
+    /*----------------------------------------------------
+    | Constructor.
+    |---------------------------------------------------*/
     function TinGrid$(container, options) {
 
+        /*----------------------------------------------------
+        | Settings & options.
+        |---------------------------------------------------*/
         var settings = {
+            columnBreakpoints: [470, 660, 930, 1200, 1560, 1880], // Adds one column per breakpoint.
             itemHeightType: "auto",  // "auto", "fixed" or "ratio".
             itemHeight: null,        // Number (pixels) for itemHeightType "fixed", Number (width / height) for itemHeightType "ratio".
             wideItemHeight: null,     // Height of wide item. Otherwise same as itemHeight. Falls back to itemHeight if necessary.
@@ -54,10 +64,18 @@
             settings.wideItemHeight = settings.itemHeight;
         }
 
+        /*----------------------------------------------------
+        | General variables.
+        |---------------------------------------------------*/
         var tableau_num_cols;
         var tableau_timer = 0;
         var tableau_data = [];
 
+        /*----------------------------------------------------
+        | Add tableau (grid).
+        | Will make it easy to implement "load more"
+        | in the future.
+        |---------------------------------------------------*/
         tableau_add(container);
         if(tableau_data.length) {
             tableau_update();
@@ -70,9 +88,9 @@
 
             var ul = tableau_element.querySelector('ul');
             
-            /**
-             *  Randomize and store items.
-             */
+            /*----------------------------------------------------
+            | Store items.
+            |---------------------------------------------------*/
             var items = [];
             var ul_li = ul.children;
             for(i=0; i<ul_li.length; i++) {
@@ -84,6 +102,9 @@
                 items.push(li);
             }
 
+            /*----------------------------------------------------
+            | Optionally randomize items.
+            |---------------------------------------------------*/
             if(isTrue(tableau_element.getAttribute('data-randomized'))) {
                 function shuffle(o) { //v1.0
                     for(j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
@@ -92,6 +113,9 @@
                 items = shuffle(items);
             }
             
+            /*----------------------------------------------------
+            | Store tableau with parsed elements etc.
+            |---------------------------------------------------*/
             tableau_data.push({
                 "tableau": tableau_element,
                 "ul": ul,
@@ -100,6 +124,9 @@
             });
         }
 
+        /*----------------------------------------------------
+        | Update all tableaus registered by this instance.
+        |---------------------------------------------------*/
         function tableau_update() {
 
             var w_win, i, n, tableau_item, item, items, len, maxIdx;
@@ -108,14 +135,24 @@
             tableau_timer = setTimeout(tableau_update, 3000);
             
             w_win = container.offsetWidth;
+
+            /*----------------------------------------------------
+            | Calculate number of columns for current width.
+            |---------------------------------------------------*/
             tableau_num_cols = 1;
-            if(w_win < 470) tableau_num_cols = 1;
-            else if(w_win < 660) tableau_num_cols = 2;
-            else if(w_win < 930) tableau_num_cols = 3;
-            else if(w_win < 1200) tableau_num_cols = 4;
-            else if(w_win < 1560) tableau_num_cols = 5;
-            else if(w_win < 1880) tableau_num_cols = 6;
-            else tableau_num_cols = 7;
+            // if(w_win < 470) tableau_num_cols = 1;
+            // else if(w_win < 660) tableau_num_cols = 2;
+            // else if(w_win < 930) tableau_num_cols = 3;
+            // else if(w_win < 1200) tableau_num_cols = 4;
+            // else if(w_win < 1560) tableau_num_cols = 5;
+            // else if(w_win < 1880) tableau_num_cols = 6;
+            // else tableau_num_cols = 7;
+            for(i=0, n=settings.columnBreakpoints.length; i<n; i++) {
+                if(w_win < settings.columnBreakpoints[i]) {
+                    break;
+                }
+                tableau_num_cols++;
+            }
 
             var w_col_perc = 100 / tableau_num_cols;
             var w_col = Math.floor((1/tableau_num_cols)*w_win);
