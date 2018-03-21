@@ -179,7 +179,9 @@
                 items = [];
                 for(i=0, len=tableau_item.items.length; i<len; i++) {
                     item = tableau_item.items[i];
-                    items.push(item);
+                    if(item.className.split(' ').indexOf('off') === -1) {
+                        items.push(item);
+                    }
                 }
                 
                 maxIdx = 0;
@@ -285,11 +287,11 @@
 
                 tableau_item.ul.style.height = maxY+"px";
                 
-                /**
-                 *  Center the tablueau if needed.
-                 */
-                var diff = tableau_num_cols - maxIdx;
-                tableau_item.ul.style.left = 0.5*diff*(100/tableau_num_cols)+"%";
+                // /**
+                //  *  Center the tablueau if needed.
+                //  */
+                // var diff = tableau_num_cols - maxIdx;
+                // tableau_item.ul.style.left = 0.5*diff*(100/tableau_num_cols)+"%";
             }
         }
 
@@ -328,6 +330,9 @@
             return itemHeight;
         } 
 
+        return {
+            update: tableau_update
+        };
     }
 
     return TinGrid$;
