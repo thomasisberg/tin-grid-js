@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.2
+ * TinGrid v0.1.3
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -191,7 +191,7 @@
                 |---------------------------------------------------*/
                 for(i=0; i<items.length; i++) {
                     item = items[i];
-                    var itemIsWide = hasClass(item, "wide");
+                    var itemIsWide = tableau_num_cols > 1 ? hasClass(item, "wide") : false;
 
                     /*----------------------------------------------------
                     | Set item width and possibly height,
@@ -233,7 +233,7 @@
                             var gapAbs = gap > 0 ? gap : -gap;
                             var jItem = items[j];
 
-                            var jItemIsWide = hasClass(jItem, "wide");
+                            var jItemIsWide = tableau_num_cols > 1 ? hasClass(jItem, "wide") : false;
 
                             if(!jItemIsWide) {
                                 jItem.style.width = (w_col_perc*(jItemIsWide?2:1)) + "%";

@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.2
+ * TinGrid v0.1.3
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -41,7 +41,7 @@
             itemHeightType: "auto",  // "auto", "fixed" or "ratio".
             itemHeight: null,        // Number (pixels) for itemHeightType "fixed", Number (width / height) for itemHeightType "ratio".
             wideItemHeight: null,     // Height of wide item. Otherwise same as itemHeight. Falls back to itemHeight if necessary.
-            useTransition: false,    // Will probably not work too well with itemHeightType "auto".
+            useTransition: false,    // If itemHeightType is "auto", the width and height of the items will not be animated.
             transitionTime: "400ms", // Transition time.
             transitionEasing: "cubic-bezier(.48,.01,.21,1)" // Transition easing equation.
         }
@@ -97,7 +97,11 @@
                 var li = ul_li[i];
                 li.style.position = "absolute";
                 if(settings.useTransition) {
-                    li.style.transition = "top "+settings.transitionTime+" "+settings.transitionEasing+", left "+settings.transitionTime+" "+settings.transitionEasing+", width "+settings.transitionTime+" "+settings.transitionEasing+", height "+settings.transitionTime+" "+settings.transitionEasing;
+                    var transition = "top "+settings.transitionTime+" "+settings.transitionEasing+", left "+settings.transitionTime+" "+settings.transitionEasing;
+                    if(settings.itemHeightType !== "auto") {
+                        transition += ", width "+settings.transitionTime+" "+settings.transitionEasing+", height "+settings.transitionTime+" "+settings.transitionEasing;
+                    }
+                    li.style.transition = transition;
                 }
                 items.push(li);
             }
@@ -140,13 +144,6 @@
             | Calculate number of columns for current width.
             |---------------------------------------------------*/
             tableau_num_cols = 1;
-            // if(w_win < 470) tableau_num_cols = 1;
-            // else if(w_win < 660) tableau_num_cols = 2;
-            // else if(w_win < 930) tableau_num_cols = 3;
-            // else if(w_win < 1200) tableau_num_cols = 4;
-            // else if(w_win < 1560) tableau_num_cols = 5;
-            // else if(w_win < 1880) tableau_num_cols = 6;
-            // else tableau_num_cols = 7;
             for(i=0, n=settings.columnBreakpoints.length; i<n; i++) {
                 if(w_win < settings.columnBreakpoints[i]) {
                     break;
@@ -154,50 +151,61 @@
                 tableau_num_cols++;
             }
 
+            /*----------------------------------------------------
+            | Current column width.
+            |---------------------------------------------------*/
             var w_col_perc = 100 / tableau_num_cols;
             var w_col = Math.floor((1/tableau_num_cols)*w_win);
             
+            /*----------------------------------------------------
+            | Iterate tableaus.
+            |---------------------------------------------------*/
             for(n=0; n<tableau_data.length; n++) {
                 
                 tableau_item = tableau_data[n];
                 
-                /**
-                 *  Reset columns.
-                 */
+                /*----------------------------------------------------
+                | Reset columns.
+                |---------------------------------------------------*/
                 tableau_item.cols = [];
                 for(i=0; i<tableau_num_cols; i++) {
                     tableau_item.cols[i] = 0;
                 }
                 
+                /*----------------------------------------------------
+                | Create array of items.
+                | Any future filtering should be done here.
+                |---------------------------------------------------*/
                 items = [];
-                len = tableau_item.items.length;	
-                for(i=0; i<len; i++) {
-                    
+                for(i=0, len=tableau_item.items.length; i<len; i++) {
                     item = tableau_item.items[i];
-                    items.push(item);
-                    
+                    if(item.className.split(' ').indexOf('off') === -1) {
+                        items.push(item);
+                    }
                 }
                 
                 maxIdx = 0;
                 
-                /**
-                 *  Go through items.
-                 */
+                /*----------------------------------------------------
+                | Go through relevant items.
+                |---------------------------------------------------*/
                 for(i=0; i<items.length; i++) {
-
                     item = items[i];
+                    var itemIsWide = tableau_num_cols > 1 ? hasClass(item, "wide") : false;
 
-                    var itemIsWide = hasClass(item, "wide");
-                    item.style.width = (w_col_perc*(itemIsWide?2:1)) + "%";
-                    
-                    /**
-                     *  Place the item in column.
-                     *  1. Check if there is a gap somewhere that is big enough.
-                     *  2. Make sure wide items don't get placed at last column. Preferrably alter between pulling back a column and pushing to first column.
-                     *  3. Store/update gaps.
-                     */
-
+                    /*----------------------------------------------------
+                    | Set item width and possibly height,
+                    | depending on itemHeightType setting.
+                    |---------------------------------------------------*/
+                    item.style.width = (w_col_perc*(itemIsWide&&tableau_num_cols>1?2:1)) + "%";
                     var itemHeight = getItemHeight(item, itemIsWide, w_col);
+
+                    /*----------------------------------------------------
+                    | Place the item in column.
+                    | 1. Check if there is a gap somewhere that is big enough.
+                    | 2. Make sure wide items don't get placed at last column. Preferrably alter between pulling back a column and pushing to first column.
+                    | 3. Store/update gaps.
+                    |---------------------------------------------------*/
                     
                     var colIdx = 0;
                     var minY = Number.MAX_VALUE;
@@ -212,9 +220,9 @@
                         }
                     }
 
-                    /**
-                     *  Handle gaps.
-                     */
+                    /*----------------------------------------------------
+                    | Handle gaps.
+                    |---------------------------------------------------*/
                     if(itemIsWide && tableau_num_cols>1) {
                     
                         /**
@@ -225,7 +233,7 @@
                             var gapAbs = gap > 0 ? gap : -gap;
                             var jItem = items[j];
 
-                            var jItemIsWide = hasClass(jItem, "wide");
+                            var jItemIsWide = tableau_num_cols > 1 ? hasClass(jItem, "wide") : false;
 
                             if(!jItemIsWide) {
                                 jItem.style.width = (w_col_perc*(jItemIsWide?2:1)) + "%";
@@ -279,11 +287,11 @@
 
                 tableau_item.ul.style.height = maxY+"px";
                 
-                /**
-                 *  Center the tablueau if needed.
-                 */
-                var diff = tableau_num_cols - maxIdx;
-                tableau_item.ul.style.left = 0.5*diff*(100/tableau_num_cols)+"%";
+                // /**
+                //  *  Center the tablueau if needed.
+                //  */
+                // var diff = tableau_num_cols - maxIdx;
+                // tableau_item.ul.style.left = 0.5*diff*(100/tableau_num_cols)+"%";
             }
         }
 
@@ -322,6 +330,9 @@
             return itemHeight;
         } 
 
+        return {
+            update: tableau_update
+        };
     }
 
     return TinGrid$;
