@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.5
+ * TinGrid v0.1.6
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -43,7 +43,8 @@
             wideItemHeight: null,     // Height of wide item. Otherwise same as itemHeight. Falls back to itemHeight if necessary.
             useTransition: false,    // If itemHeightType is "auto", the width and height of the items will not be animated.
             transitionTime: "400ms", // Transition time.
-            transitionEasing: "cubic-bezier(.48,.01,.21,1)" // Transition easing equation.
+            transitionEasing: "cubic-bezier(.48,.01,.21,1)", // Transition easing equation.
+            minOffsetYNextColumn: 0 // How much higher up must the next column place item to be selected in favout of previous column.
         }
         if(isObject(options)) {
             for(var v in settings) {
@@ -223,7 +224,7 @@
                         if(itemIsWide && tableau_num_cols>1) {
                             if(tableau_item.cols[j+1] > colY) colY = tableau_item.cols[j+1];
                         }
-                        if(colY < minY) {
+                        if(colY < minY - settings.minOffsetYNextColumn) {
                             colIdx = j;
                             minY = colY;
                         }
