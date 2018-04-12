@@ -6,7 +6,7 @@
     "_resolution": {
         "type": "version",
         "tag": "v0.1.5",
-        "commit": "1b3d686be3e58e0069136aafdad285e456313a53"
+        "commit": "03c8449d2eaf5206c4a9e4e8cfa10f6c226434a0"
     },
     "_source": "https://github.com/thomasisberg/tin-grid-js.git",
     "_target": "0.1.5",
