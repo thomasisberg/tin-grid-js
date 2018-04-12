@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.7
+ * TinGrid v0.1.8
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -85,7 +85,7 @@
 
         function tableau_add(tableau_element) {
             
-            var i, j, x;
+            var i, j, x, n;
 
             var ul = tableau_element.querySelector('ul');
             
@@ -127,6 +127,14 @@
                 "items": items,
                 "cols": null
             });
+
+            /*----------------------------------------------------
+            | Update tableau on image load.
+            |---------------------------------------------------*/
+            var images = tableau_element.querySelectorAll('img');
+            for(i=0, n=images.length; i<n; i++) {
+                images[i].addEventListener('load', tableau_update);
+            }
         }
 
         /*----------------------------------------------------
