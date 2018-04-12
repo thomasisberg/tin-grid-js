@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.3
+ * TinGrid v0.1.4
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -174,7 +174,7 @@
                 
                 /*----------------------------------------------------
                 | Create array of items.
-                | Any future filtering should be done here.
+                | Filtering should be done here.
                 |---------------------------------------------------*/
                 items = [];
                 for(i=0, len=tableau_item.items.length; i<len; i++) {
@@ -182,6 +182,15 @@
                     if(item.className.split(' ').indexOf('off') === -1) {
                         items.push(item);
                     }
+                }
+
+                /*----------------------------------------------------
+                | Sort array if sorting seems to be defined.
+                |---------------------------------------------------*/
+                if(!isEmpty(items[0].getAttribute('tin-grid-sort'))) {
+                    items.sort(function(a, b) {
+                        return parseInt(a.getAttribute('tin-grid-sort'), 10) - parseInt(b.getAttribute('tin-grid-sort'), 10);
+                    });
                 }
                 
                 maxIdx = 0;
@@ -328,10 +337,32 @@
                 }
             }
             return itemHeight;
-        } 
+        }
+
+        /*----------------------------------------------------
+        | Grid haas been sorted, so items need new positions.
+        |---------------------------------------------------*/
+        function tableau_sorted() {
+
+            var i, n, tableau_item, items, ul_li, li, item, len;
+
+            /*----------------------------------------------------
+            | Iterate tableaus.
+            |---------------------------------------------------*/
+            for(n=0; n<tableau_data.length; n++) {
+                tableau_item = tableau_data[n];
+                items = [];
+                ul_li = tableau_item.ul.children;
+                for(i=0; i<ul_li.length; i++) {
+                    items.push(ul_li[i]);
+                }
+                tableau_item.items = items;
+            }
+        }
 
         return {
-            update: tableau_update
+            update: tableau_update,
+            sorted: tableau_sorted
         };
     }
 
