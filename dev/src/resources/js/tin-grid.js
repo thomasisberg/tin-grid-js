@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.6
+ * TinGrid v0.1.7
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -151,6 +151,7 @@
                 }
                 tableau_num_cols++;
             }
+            container.setAttribute('tin-grid-cols', tableau_num_cols);
 
             /*----------------------------------------------------
             | Current column width.
