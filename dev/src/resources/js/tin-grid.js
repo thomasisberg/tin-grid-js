@@ -197,7 +197,7 @@
                 /*----------------------------------------------------
                 | Sort array if sorting seems to be defined.
                 |---------------------------------------------------*/
-                if(!isEmpty(items[0].getAttribute('tin-grid-sort'))) {
+                if(items.length && !isEmpty(items[0].getAttribute('tin-grid-sort'))) {
                     items.sort(function(a, b) {
                         return parseInt(a.getAttribute('tin-grid-sort'), 10) - parseInt(b.getAttribute('tin-grid-sort'), 10);
                     });
