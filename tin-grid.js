@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.8
+ * TinGrid v0.1.9
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -122,10 +122,11 @@
             | Store tableau with parsed elements etc.
             |---------------------------------------------------*/
             tableau_data.push({
-                "tableau": tableau_element,
-                "ul": ul,
-                "items": items,
-                "cols": null
+                tableau: tableau_element,
+                ul: ul,
+                items: items,
+                cols: null,
+                cols_real: null
             });
 
             /*----------------------------------------------------
@@ -178,8 +179,10 @@
                 | Reset columns.
                 |---------------------------------------------------*/
                 tableau_item.cols = [];
+                tableau_item.cols_real = [];
                 for(i=0; i<tableau_num_cols; i++) {
                     tableau_item.cols[i] = 0;
+                    tableau_item.cols_real[i] = 0;
                 }
                 
                 /*----------------------------------------------------
@@ -197,7 +200,7 @@
                 /*----------------------------------------------------
                 | Sort array if sorting seems to be defined.
                 |---------------------------------------------------*/
-                if(!isEmpty(items[0].getAttribute('tin-grid-sort'))) {
+                if(items.length && !isEmpty(items[0].getAttribute('tin-grid-sort'))) {
                     items.sort(function(a, b) {
                         return parseInt(a.getAttribute('tin-grid-sort'), 10) - parseInt(b.getAttribute('tin-grid-sort'), 10);
                     });
@@ -240,6 +243,22 @@
                     }
 
                     /*----------------------------------------------------
+                    | If the item had a preferred position.
+                    |---------------------------------------------------*/
+                    if(!isEmpty(item.getAttribute('tin-grid-position'))) {
+                        var position = item.getAttribute('tin-grid-position');
+                        if(position === 'left') {
+                            colIdx = 0;
+                        }
+                        else if(position === 'center') {
+                            colIdx = Math.floor((tableau_num_cols-1-(itemIsWide?1:0)) / 2)
+                        }
+                        else if(position === 'right') {
+                            colIdx = tableau_num_cols-1-(itemIsWide?1:0);
+                        }
+                    }
+
+                    /*----------------------------------------------------
                     | Handle gaps.
                     |---------------------------------------------------*/
                     if(itemIsWide && tableau_num_cols>1) {
@@ -269,7 +288,7 @@
                                     jItem.style.left = gapColIdx*(100/tableau_num_cols)+"%";
                                     
                                     tableau_item.cols[gapColIdx] += jItemHeight;
-                                    minY = tableau_item.cols[colIdx] > tableau_item.cols[colIdx+1] ? tableau_item.cols[colIdx] : tableau_item.cols[colIdx+1];
+                                    minY = tableau_item.cols_real[colIdx] > tableau_item.cols_real[colIdx+1] ? tableau_item.cols_real[colIdx] : tableau_item.cols_real[colIdx+1];
                                     
                                 } else {
                                     
@@ -277,13 +296,19 @@
                                     
                                 }
                             }
-                        }
-                        
+                        }   
                     }
-                    
-                    tableau_item.cols[colIdx] = minY + itemHeight;
+
+                    var calculationHeight = itemHeight;
+                    if(tableau_num_cols > 2 && !isEmpty(item.getAttribute('tin-grid-solo'))) {
+                        calculationHeight = Number.MAX_VALUE;
+                    }
+
+                    tableau_item.cols[colIdx] = minY + calculationHeight;
+                    tableau_item.cols_real[colIdx] = minY + itemHeight;
                     if(itemIsWide) {
-                        tableau_item.cols[colIdx+1] = minY + itemHeight;
+                        tableau_item.cols[colIdx+1] = minY + calculationHeight;
+                        tableau_item.cols_real[colIdx+1] = minY + itemHeight;
                     }
 
                     item.style.top = minY+"px";
@@ -301,7 +326,7 @@
                  */
                 var maxY = 0;
                 for(var i=0; i<tableau_num_cols; i++) {
-                    if(tableau_item.cols[i] > maxY) maxY = tableau_item.cols[i];
+                    if(tableau_item.cols_real[i] > maxY) maxY = tableau_item.cols_real[i];
                 }
 
                 tableau_item.ul.style.height = maxY+"px";
