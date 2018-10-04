@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.12
+ * TinGrid v0.1.13
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -314,12 +314,10 @@
                     }
 
                     var calculationHeight = itemHeight;
-                    if(tableau_num_cols > 2 && !isEmpty(item.getAttribute('tin-grid-solo'))) {
+                    if(tableau_num_cols > colSpan && !isEmpty(item.getAttribute('tin-grid-solo'))) {
                         calculationHeight = Number.MAX_VALUE;
                     }
-
-                    // tableau_item.cols[colIdx] = minY + calculationHeight;
-                    // tableau_item.cols_real[colIdx] = minY + itemHeight;
+                    
                     for(j=0; j<colSpan; j++) {
                         tableau_item.cols[colIdx+j] = minY + calculationHeight;
                         tableau_item.cols_real[colIdx+j] = minY + itemHeight;
