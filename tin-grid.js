@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.11
+ * TinGrid v0.1.12
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -38,6 +38,7 @@
         |---------------------------------------------------*/
         var settings = {
             columnBreakpoints: [470, 660, 930, 1200, 1560, 1880], // Adds one column per breakpoint.
+            wideColSpan: 2, // Column span for wide items. Specify array for different setting per break point.
             itemHeightType: "auto",  // "auto", "fixed" or "ratio".
             itemHeight: null,        // Number (pixels) for itemHeightType "fixed", Number (width / height) for itemHeightType "ratio".
             wideItemHeight: null,     // Height of wide item. Otherwise same as itemHeight. Falls back to itemHeight if necessary.
@@ -52,6 +53,10 @@
                     settings[v] = options[v];
                 }
             }
+        }
+        if(Array.isArray(settings.wideColSpan) && settings.wideColSpan.length !== settings.columnBreakpoints.length+1) {
+            console.log("TinGrid: When specifying wide col spans for break points, you must specify exactly one col span per breakpoint. Expected " + (settings.columnBreakpoints.length+1) + " but found " + settings.wideColSpan.length);
+            return;
         }
         if(settings.itemHeightType !== 'auto' && typeof settings.itemHeight !== 'number') {
             console.log("TinGrid: You must specify itemHeight as a Number.");
@@ -143,7 +148,7 @@
         |---------------------------------------------------*/
         function tableau_update() {
 
-            var w_win, i, n, tableau_item, item, items, len, maxIdx;
+            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, colSpan;
             
             clearTimeout(tableau_timer);
             tableau_timer = setTimeout(tableau_update, 3000);
@@ -161,6 +166,11 @@
                 tableau_num_cols++;
             }
             container.setAttribute('tin-grid-cols', tableau_num_cols);
+
+            wideColSpan = Array.isArray(settings.wideColSpan) ? settings.wideColSpan[tableau_num_cols-1] : settings.wideColSpan;
+            if(wideColSpan > tableau_num_cols) {
+                wideColSpan = tableau_num_cols;
+            }
 
             /*----------------------------------------------------
             | Current column width.
@@ -215,11 +225,13 @@
                     item = items[i];
                     var itemIsWide = tableau_num_cols > 1 ? hasClass(item, "wide") : false;
 
+                    colSpan = itemIsWide ? wideColSpan : 1;
+
                     /*----------------------------------------------------
                     | Set item width and possibly height,
                     | depending on itemHeightType setting.
                     |---------------------------------------------------*/
-                    item.style.width = (w_col_perc*(itemIsWide&&tableau_num_cols>1?2:1)) + "%";
+                    item.style.width = (w_col_perc*colSpan) + "%";
                     var itemHeight = getItemHeight(item, itemIsWide, w_col);
 
                     /*----------------------------------------------------
@@ -231,10 +243,12 @@
                     
                     var colIdx = 0;
                     var minY = Number.MAX_VALUE;
-                    for(var j=0; j<tableau_num_cols-(itemIsWide&&tableau_num_cols>1?1:0); j++) {
+                    for(j=0; j<tableau_num_cols-(colSpan-1); j++) {
                         var colY = tableau_item.cols[j];
-                        if(itemIsWide && tableau_num_cols>1) {
-                            if(tableau_item.cols[j+1] > colY) colY = tableau_item.cols[j+1];
+                        for(k=1; k<colSpan; k++) {
+                            if(tableau_item.cols[j+k] > colY) {
+                                colY = tableau_item.cols[j+k];
+                            }
                         }
                         if(colY < minY - settings.minOffsetYNextColumn) {
                             colIdx = j;
@@ -251,22 +265,22 @@
                             colIdx = 0;
                         }
                         else if(position === 'center') {
-                            colIdx = Math.floor((tableau_num_cols-1-(itemIsWide?1:0)) / 2)
+                            colIdx = Math.floor((tableau_num_cols-colSpan) / 2)
                         }
                         else if(position === 'right') {
-                            colIdx = tableau_num_cols-1-(itemIsWide?1:0);
+                            colIdx = tableau_num_cols-colSpan;
                         }
                     }
 
                     /*----------------------------------------------------
                     | Handle gaps.
                     |---------------------------------------------------*/
-                    if(itemIsWide && tableau_num_cols>1) {
+                    if(colSpan>1) {
                     
                         /**
                          *  If the gap gets smaller by putting the next single column item in there, then do it.
                          */
-                        for(var j=i+1; j<items.length; j++) {
+                        for(j=i+1; j<items.length; j++) {
                             var gap = tableau_item.cols[colIdx+1] - tableau_item.cols[colIdx];
                             var gapAbs = gap > 0 ? gap : -gap;
                             var jItem = items[j];
@@ -304,11 +318,11 @@
                         calculationHeight = Number.MAX_VALUE;
                     }
 
-                    tableau_item.cols[colIdx] = minY + calculationHeight;
-                    tableau_item.cols_real[colIdx] = minY + itemHeight;
-                    if(itemIsWide) {
-                        tableau_item.cols[colIdx+1] = minY + calculationHeight;
-                        tableau_item.cols_real[colIdx+1] = minY + itemHeight;
+                    // tableau_item.cols[colIdx] = minY + calculationHeight;
+                    // tableau_item.cols_real[colIdx] = minY + itemHeight;
+                    for(j=0; j<colSpan; j++) {
+                        tableau_item.cols[colIdx+j] = minY + calculationHeight;
+                        tableau_item.cols_real[colIdx+j] = minY + itemHeight;
                     }
 
                     item.style.top = minY+"px";
@@ -317,7 +331,9 @@
                     /**
                      *  Keep track of the total tableau width, so we can center the tableau if needed.
                      */
-                    if(colIdx+(tableau_num_cols>1&&itemIsWide?2:1) > maxIdx) maxIdx = colIdx+(tableau_num_cols>1&&itemIsWide?2:1);
+                    if(colIdx+colSpan > maxIdx) {
+                        maxIdx = colIdx+colSpan;
+                    }
                     
                 }
                 
