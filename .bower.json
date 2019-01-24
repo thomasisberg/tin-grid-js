@@ -1,15 +1,15 @@
 {
     "name": "tin-grid",
     "homepage": "https://github.com/thomasisberg/tin-grid-js",
-    "version": "0.1.13",
-    "_release": "0.1.13",
+    "version": "0.1.14",
+    "_release": "0.1.14",
     "_resolution": {
         "type": "version",
-        "tag": "v0.1.13",
+        "tag": "v0.1.14",
         "commit": "31ec06ee6f7359abb28459fc818419259f93d233"
     },
     "_source": "https://github.com/thomasisberg/tin-grid-js.git",
-    "_target": "0.1.13",
+    "_target": "0.1.14",
     "_originalSource": "tin-grid",
     "main": [
         "./tin-grid.js"

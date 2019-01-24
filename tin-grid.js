@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.13
+ * TinGrid v0.1.14
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -27,6 +27,19 @@
         }
         return element.className.split(" ").indexOf(className) >= 0;
     }
+    function addClass(element, className) {
+        if(!hasClass(element, className)) {
+            element.className = isEmpty(element.className) ? className : element.className + ' '  + className;
+        }
+    }
+    function removeClass(element, className) {
+        if(hasClass(element, className)) {
+            var classNames = element.className.split(" ");
+            var index = classNames.indexOf(className);
+            classNames.splice(index, 1);
+            element.className = classNames.join(' ');
+        }
+    }
 
     /*----------------------------------------------------
     | Constructor.
@@ -45,7 +58,8 @@
             useTransition: false,    // If itemHeightType is "auto", the width and height of the items will not be animated.
             transitionTime: "400ms", // Transition time.
             transitionEasing: "cubic-bezier(.48,.01,.21,1)", // Transition easing equation.
-            minOffsetYNextColumn: 0 // How much higher up must the next column place item to be selected in favout of previous column.
+            minOffsetYNextColumn: 0, // How much higher up must the next column place item to be selected in favout of previous column.
+            useOptimizedPositions: true // Disable if items should always be placed in the next column.
         }
         if(isObject(options)) {
             for(var v in settings) {
@@ -148,7 +162,7 @@
         |---------------------------------------------------*/
         function tableau_update() {
 
-            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, colSpan;
+            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, currentColIdx, colSpan, minY;
             
             clearTimeout(tableau_timer);
             tableau_timer = setTimeout(tableau_update, 3000);
@@ -190,9 +204,11 @@
                 |---------------------------------------------------*/
                 tableau_item.cols = [];
                 tableau_item.cols_real = [];
+                tableau_item.cols_items = [];
                 for(i=0; i<tableau_num_cols; i++) {
                     tableau_item.cols[i] = 0;
                     tableau_item.cols_real[i] = 0;
+                    tableau_item.cols_items[i] = [];
                 }
                 
                 /*----------------------------------------------------
@@ -217,6 +233,7 @@
                 }
                 
                 maxIdx = 0;
+                currentColIdx = -1;
                 
                 /*----------------------------------------------------
                 | Go through relevant items.
@@ -234,25 +251,36 @@
                     item.style.width = (w_col_perc*colSpan) + "%";
                     var itemHeight = getItemHeight(item, itemIsWide, w_col);
 
+                    currentColIdx = (currentColIdx + 1) % tableau_num_cols;
+                    var colIdx = currentColIdx;
+
                     /*----------------------------------------------------
                     | Place the item in column.
                     | 1. Check if there is a gap somewhere that is big enough.
                     | 2. Make sure wide items don't get placed at last column. Preferrably alter between pulling back a column and pushing to first column.
                     | 3. Store/update gaps.
                     |---------------------------------------------------*/
-                    
-                    var colIdx = 0;
-                    var minY = Number.MAX_VALUE;
-                    for(j=0; j<tableau_num_cols-(colSpan-1); j++) {
-                        var colY = tableau_item.cols[j];
-                        for(k=1; k<colSpan; k++) {
-                            if(tableau_item.cols[j+k] > colY) {
-                                colY = tableau_item.cols[j+k];
+                    if(settings.useOptimizedPositions) {  
+                        var colIdx = 0;
+                        minY = Number.MAX_VALUE;
+                        for(j=0; j<tableau_num_cols-(colSpan-1); j++) {
+                            var colY = tableau_item.cols[j];
+                            for(k=1; k<colSpan; k++) {
+                                if(tableau_item.cols[j+k] > colY) {
+                                    colY = tableau_item.cols[j+k];
+                                }
+                            }
+                            if(colY < minY - settings.minOffsetYNextColumn) {
+                                colIdx = j;
+                                minY = colY;
                             }
                         }
-                        if(colY < minY - settings.minOffsetYNextColumn) {
-                            colIdx = j;
-                            minY = colY;
+                    } else {
+                        minY = 0;
+                        for(j=0; j<colSpan; j++) {
+                            if(tableau_item.cols[colIdx+j] > minY) {
+                                minY = tableau_item.cols[colIdx+j];
+                            }
                         }
                     }
 
@@ -275,11 +303,12 @@
                     /*----------------------------------------------------
                     | Handle gaps.
                     |---------------------------------------------------*/
-                    if(colSpan>1) {
+                    if(colSpan>1 && settings.useOptimizedPositions) {
                     
-                        /**
-                         *  If the gap gets smaller by putting the next single column item in there, then do it.
-                         */
+                        /* -----------------------------------------------------------
+                        | If the gap gets smaller by putting the next single column
+                        | item in there, then do it.
+                        |---------------------------------------------------------- */
                         for(j=i+1; j<items.length; j++) {
                             var gap = tableau_item.cols[colIdx+1] - tableau_item.cols[colIdx];
                             var gapAbs = gap > 0 ? gap : -gap;
@@ -305,13 +334,16 @@
                                     minY = tableau_item.cols_real[colIdx] > tableau_item.cols_real[colIdx+1] ? tableau_item.cols_real[colIdx] : tableau_item.cols_real[colIdx+1];
                                     
                                 } else {
-                                    
                                     break;
-                                    
                                 }
                             }
                         }   
                     }
+
+                    /*-----------------------------------------------------------
+                    | Add item to column array.
+                    |----------------------------------------------------------*/
+                    tableau_item.cols_items[colIdx].push(item);
 
                     var calculationHeight = itemHeight;
                     if(tableau_num_cols > colSpan && !isEmpty(item.getAttribute('tin-grid-solo'))) {
@@ -326,27 +358,47 @@
                     item.style.top = minY+"px";
                     item.style.left = colIdx*(100/tableau_num_cols)+"%";
                     
-                    /**
-                     *  Keep track of the total tableau width, so we can center the tableau if needed.
-                     */
+                    /* -----------------------------------------------------------
+                    | Keep track of the total tableau width, so we can center
+                    | the tableau if needed.
+                    |---------------------------------------------------------- */
                     if(colIdx+colSpan > maxIdx) {
                         maxIdx = colIdx+colSpan;
                     }
-                    
-                }
-                
-                /**
-                 *  Update the tableau height.
-                 */
-                var maxY = 0;
-                for(var i=0; i<tableau_num_cols; i++) {
-                    if(tableau_item.cols_real[i] > maxY) maxY = tableau_item.cols_real[i];
                 }
 
+                /*-----------------------------------------------------------
+                | Set classes on first / last items in columns.
+                |----------------------------------------------------------*/
+                for(i=0; i<tableau_num_cols; i++) {
+                    var len = tableau_item.cols_items[i].length;
+                    for(j=0; j<len; j++) {
+                        if(j === 0) {
+                            addClass(tableau_item.cols_items[i][j], 'tin-grid-first');
+                        } else {
+                            removeClass(tableau_item.cols_items[i][j], 'tin-grid-first');
+                        }
+                        if(j === len-1) {
+                            addClass(tableau_item.cols_items[i][j], 'tin-grid-last');
+                        } else {
+                            removeClass(tableau_item.cols_items[i][j], 'tin-grid-last');
+                        }
+                    }
+                }
+                
+                /*-----------------------------------------------------------
+                | Update the tableau height.
+                |----------------------------------------------------------*/
+                var maxY = 0;
+                for(i=0; i<tableau_num_cols; i++) {
+                    if(tableau_item.cols_real[i] > maxY) {
+                        maxY = tableau_item.cols_real[i];
+                    }
+                }
                 tableau_item.ul.style.height = maxY+"px";
                 
                 // /**
-                //  *  Center the tablueau if needed.
+                //  *  Center the tableau if needed.
                 //  */
                 // var diff = tableau_num_cols - maxIdx;
                 // tableau_item.ul.style.left = 0.5*diff*(100/tableau_num_cols)+"%";
@@ -418,4 +470,3 @@
     return TinGrid$;
 
 })));
-

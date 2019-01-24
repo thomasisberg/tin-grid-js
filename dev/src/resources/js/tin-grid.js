@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.13
+ * TinGrid v0.1.14
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
@@ -26,6 +26,19 @@
             return false;
         }
         return element.className.split(" ").indexOf(className) >= 0;
+    }
+    function addClass(element, className) {
+        if(!hasClass(element, className)) {
+            element.className = isEmpty(element.className) ? className : element.className + ' '  + className;
+        }
+    }
+    function removeClass(element, className) {
+        if(hasClass(element, className)) {
+            var classNames = element.className.split(" ");
+            var index = classNames.indexOf(className);
+            classNames.splice(index, 1);
+            element.className = classNames.join(' ');
+        }
     }
 
     /*----------------------------------------------------
@@ -149,7 +162,7 @@
         |---------------------------------------------------*/
         function tableau_update() {
 
-            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, currentColIdx, colSpan;
+            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, currentColIdx, colSpan, minY;
             
             clearTimeout(tableau_timer);
             tableau_timer = setTimeout(tableau_update, 3000);
@@ -191,9 +204,11 @@
                 |---------------------------------------------------*/
                 tableau_item.cols = [];
                 tableau_item.cols_real = [];
+                tableau_item.cols_items = [];
                 for(i=0; i<tableau_num_cols; i++) {
                     tableau_item.cols[i] = 0;
                     tableau_item.cols_real[i] = 0;
+                    tableau_item.cols_items[i] = [];
                 }
                 
                 /*----------------------------------------------------
@@ -247,7 +262,7 @@
                     |---------------------------------------------------*/
                     if(settings.useOptimizedPositions) {  
                         var colIdx = 0;
-                        var minY = Number.MAX_VALUE;
+                        minY = Number.MAX_VALUE;
                         for(j=0; j<tableau_num_cols-(colSpan-1); j++) {
                             var colY = tableau_item.cols[j];
                             for(k=1; k<colSpan; k++) {
@@ -258,6 +273,13 @@
                             if(colY < minY - settings.minOffsetYNextColumn) {
                                 colIdx = j;
                                 minY = colY;
+                            }
+                        }
+                    } else {
+                        minY = 0;
+                        for(j=0; j<colSpan; j++) {
+                            if(tableau_item.cols[colIdx+j] > minY) {
+                                minY = tableau_item.cols[colIdx+j];
                             }
                         }
                     }
@@ -283,9 +305,10 @@
                     |---------------------------------------------------*/
                     if(colSpan>1 && settings.useOptimizedPositions) {
                     
-                        /**
-                         *  If the gap gets smaller by putting the next single column item in there, then do it.
-                         */
+                        /* -----------------------------------------------------------
+                        | If the gap gets smaller by putting the next single column
+                        | item in there, then do it.
+                        |---------------------------------------------------------- */
                         for(j=i+1; j<items.length; j++) {
                             var gap = tableau_item.cols[colIdx+1] - tableau_item.cols[colIdx];
                             var gapAbs = gap > 0 ? gap : -gap;
@@ -311,13 +334,16 @@
                                     minY = tableau_item.cols_real[colIdx] > tableau_item.cols_real[colIdx+1] ? tableau_item.cols_real[colIdx] : tableau_item.cols_real[colIdx+1];
                                     
                                 } else {
-                                    
                                     break;
-                                    
                                 }
                             }
                         }   
                     }
+
+                    /*-----------------------------------------------------------
+                    | Add item to column array.
+                    |----------------------------------------------------------*/
+                    tableau_item.cols_items[colIdx].push(item);
 
                     var calculationHeight = itemHeight;
                     if(tableau_num_cols > colSpan && !isEmpty(item.getAttribute('tin-grid-solo'))) {
@@ -332,27 +358,47 @@
                     item.style.top = minY+"px";
                     item.style.left = colIdx*(100/tableau_num_cols)+"%";
                     
-                    /**
-                     *  Keep track of the total tableau width, so we can center the tableau if needed.
-                     */
+                    /* -----------------------------------------------------------
+                    | Keep track of the total tableau width, so we can center
+                    | the tableau if needed.
+                    |---------------------------------------------------------- */
                     if(colIdx+colSpan > maxIdx) {
                         maxIdx = colIdx+colSpan;
                     }
-                    
-                }
-                
-                /**
-                 *  Update the tableau height.
-                 */
-                var maxY = 0;
-                for(var i=0; i<tableau_num_cols; i++) {
-                    if(tableau_item.cols_real[i] > maxY) maxY = tableau_item.cols_real[i];
                 }
 
+                /*-----------------------------------------------------------
+                | Set classes on first / last items in columns.
+                |----------------------------------------------------------*/
+                for(i=0; i<tableau_num_cols; i++) {
+                    var len = tableau_item.cols_items[i].length;
+                    for(j=0; j<len; j++) {
+                        if(j === 0) {
+                            addClass(tableau_item.cols_items[i][j], 'tin-grid-first');
+                        } else {
+                            removeClass(tableau_item.cols_items[i][j], 'tin-grid-first');
+                        }
+                        if(j === len-1) {
+                            addClass(tableau_item.cols_items[i][j], 'tin-grid-last');
+                        } else {
+                            removeClass(tableau_item.cols_items[i][j], 'tin-grid-last');
+                        }
+                    }
+                }
+                
+                /*-----------------------------------------------------------
+                | Update the tableau height.
+                |----------------------------------------------------------*/
+                var maxY = 0;
+                for(i=0; i<tableau_num_cols; i++) {
+                    if(tableau_item.cols_real[i] > maxY) {
+                        maxY = tableau_item.cols_real[i];
+                    }
+                }
                 tableau_item.ul.style.height = maxY+"px";
                 
                 // /**
-                //  *  Center the tablueau if needed.
+                //  *  Center the tableau if needed.
                 //  */
                 // var diff = tableau_num_cols - maxIdx;
                 // tableau_item.ul.style.left = 0.5*diff*(100/tableau_num_cols)+"%";
@@ -424,4 +470,3 @@
     return TinGrid$;
 
 })));
-
