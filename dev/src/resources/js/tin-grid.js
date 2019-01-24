@@ -45,7 +45,8 @@
             useTransition: false,    // If itemHeightType is "auto", the width and height of the items will not be animated.
             transitionTime: "400ms", // Transition time.
             transitionEasing: "cubic-bezier(.48,.01,.21,1)", // Transition easing equation.
-            minOffsetYNextColumn: 0 // How much higher up must the next column place item to be selected in favout of previous column.
+            minOffsetYNextColumn: 0, // How much higher up must the next column place item to be selected in favout of previous column.
+            useOptimizedPositions: true // Disable if items should always be placed in the next column.
         }
         if(isObject(options)) {
             for(var v in settings) {
@@ -148,7 +149,7 @@
         |---------------------------------------------------*/
         function tableau_update() {
 
-            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, colSpan;
+            var w_win, i, j, k, n, tableau_item, item, items, len, maxIdx, wideColSpan, currentColIdx, colSpan;
             
             clearTimeout(tableau_timer);
             tableau_timer = setTimeout(tableau_update, 3000);
@@ -217,6 +218,7 @@
                 }
                 
                 maxIdx = 0;
+                currentColIdx = -1;
                 
                 /*----------------------------------------------------
                 | Go through relevant items.
@@ -234,25 +236,29 @@
                     item.style.width = (w_col_perc*colSpan) + "%";
                     var itemHeight = getItemHeight(item, itemIsWide, w_col);
 
+                    currentColIdx = (currentColIdx + 1) % tableau_num_cols;
+                    var colIdx = currentColIdx;
+
                     /*----------------------------------------------------
                     | Place the item in column.
                     | 1. Check if there is a gap somewhere that is big enough.
                     | 2. Make sure wide items don't get placed at last column. Preferrably alter between pulling back a column and pushing to first column.
                     | 3. Store/update gaps.
                     |---------------------------------------------------*/
-                    
-                    var colIdx = 0;
-                    var minY = Number.MAX_VALUE;
-                    for(j=0; j<tableau_num_cols-(colSpan-1); j++) {
-                        var colY = tableau_item.cols[j];
-                        for(k=1; k<colSpan; k++) {
-                            if(tableau_item.cols[j+k] > colY) {
-                                colY = tableau_item.cols[j+k];
+                    if(settings.useOptimizedPositions) {  
+                        var colIdx = 0;
+                        var minY = Number.MAX_VALUE;
+                        for(j=0; j<tableau_num_cols-(colSpan-1); j++) {
+                            var colY = tableau_item.cols[j];
+                            for(k=1; k<colSpan; k++) {
+                                if(tableau_item.cols[j+k] > colY) {
+                                    colY = tableau_item.cols[j+k];
+                                }
                             }
-                        }
-                        if(colY < minY - settings.minOffsetYNextColumn) {
-                            colIdx = j;
-                            minY = colY;
+                            if(colY < minY - settings.minOffsetYNextColumn) {
+                                colIdx = j;
+                                minY = colY;
+                            }
                         }
                     }
 
@@ -275,7 +281,7 @@
                     /*----------------------------------------------------
                     | Handle gaps.
                     |---------------------------------------------------*/
-                    if(colSpan>1) {
+                    if(colSpan>1 && settings.useOptimizedPositions) {
                     
                         /**
                          *  If the gap gets smaller by putting the next single column item in there, then do it.
