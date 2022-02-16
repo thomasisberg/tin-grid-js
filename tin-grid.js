@@ -1,5 +1,5 @@
 /*!
- * TinGrid v0.1.14
+ * TinGrid v0.1.15
  * (c) 2018 Thomas Isberg
  * Released under the MIT License.
  */
