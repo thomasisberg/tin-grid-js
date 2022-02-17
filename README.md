@@ -13,7 +13,9 @@ bower install tin-grid --save
 ```
 
 ## Usage
-As a module
+
+### As a module
+
 ```
 import TinGrid from 'tin-grid';
 
