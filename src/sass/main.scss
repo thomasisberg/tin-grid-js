@@ -17,6 +17,19 @@ body {
     font-family: sans-serif;
 }
 
+h1 {
+    font-size: 2em;
+    text-align: center;
+    margin: 40px 20px 1em 20px;
+    font-weight: 700;
+}
+  
+h2 {
+    font-weight: 700;
+    text-align: center;
+    margin: 1em 20px 40px 20px;
+}
+
 #TinGrid {
     max-width: 1200px;
     margin-left: auto;
@@ -34,11 +47,14 @@ li {
     padding: 5px;
     
     &:after {
-        position: relative;
         display: block;
         content: "";
         background-color: red;
+        margin: 5px;
         flex-grow: 1;
-        padding-top: 100%;
     }
+}
+
+.lorem {
+    display: block;
 }
