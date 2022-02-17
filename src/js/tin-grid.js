@@ -1,6 +1,6 @@
 /*!
- * TinGrid v0.1.15
- * (c) 2018 Thomas Isberg
+ * TinGrid v0.1.17
+ * (c) 2022 Thomas Isberg
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -22,24 +22,15 @@
         return typeof value === 'object' && value !== null;
     }
     function hasClass (element, className) {
-        // if (typeof element.className !== 'string') {
-        //     return false;
-        // }
-        // return element.className.split(' ').indexOf(className) >= 0;
         return element.classList.contains(className);
     }
     function addClass (element, className) {
         if (!hasClass(element, className)) {
-            // element.className = isEmpty(element.className) ? className : element.className + ' '  + className;
             element.classList.add(className);
         }
     }
     function removeClass (element, className) {
         if (hasClass(element, className)) {
-            // var classNames = element.className.split(' ');
-            // var index = classNames.indexOf(className);
-            // classNames.splice(index, 1);
-            // element.className = classNames.join(' ');
             element.classList.remove(className);
         }
     }
