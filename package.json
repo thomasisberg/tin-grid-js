@@ -1,6 +1,6 @@
 {
     "name": "tin-grid",
-    "version": "0.1.16",
+    "version": "0.1.17",
     "description": "Responsive, dependency free grid system for Javascript",
     "main": "tin-grid.js",
     "scripts": {
