@@ -4,7 +4,8 @@
     "description": "Responsive, dependency free grid system for Javascript",
     "main": "tin-grid.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "release": "npm version patch && git push && git push --tags && npm publish"
     },
     "repository": {
         "type": "git",
